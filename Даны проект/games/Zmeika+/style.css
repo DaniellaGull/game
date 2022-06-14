@@ -1,0 +1,30 @@
+html,body {
+  height: 100%;
+  margin: 0;
+}
+/*Задаём глобальные параметры*/
+body {
+  background: url(./wallet.jpg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/*Делаем границу вокруг игрового поля*/
+canvas {
+  border: 1px solid white;
+  background: black; 
+}
+.schet{
+  display: flex;
+  justify-content: center;
+}
+.schet_nadpis{
+  margin: 0;
+  color: black;
+}
+.schet_ochki{
+  margin: 0;
+  color: black;
+  padding-left: 5px;
+}

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Football</title>
+  <!-- CSS-->
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+    }
+    body {
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+   <!--экран-->
+  <canvas width="550" height="385" id="game"></canvas>
+ <!--script-->
+  <script>
+  const canvas = document.getElementById('game');
+  const context = canvas.getContext('2d');
+  //масштаб клетки
+  const razmk = 10;
+  //размер "вратаря"
+  const HeightV = razmk * 5; 
+  //допуск движения вратарей(высота)
+  const maxVY = canvas.height - razmk - HeightV;
+  //скорость вратарей
+  var VSpeed = 8;
+  //скорость мяча
+ var ballS = 3;
+ 
+//левый вратарь
+ const leftV = {
+  x: razmk * 2,
+  y: canvas.height / 2 - HeightV / 2,
+  width: razmk,
+  height: HeightV,
+   dy: 0
+ };
+ //правый вратарь
+ const rightV = {
+  x: canvas.width - razmk * 3,
+  y: canvas.height / 2 - HeightV / 2,
+  width: razmk,
+  height: HeightV,
+    dy: 0
+ };
+//мяч
+ const ball = {
+   x: canvas.width / 2,
+   y: canvas.height / 2,
+   width: razmk,
+   height: razmk,
+   resetting: false,
+   dx: ballS,
+   dy: -ballS
+ };
+
+//алгоритм проверки наложения от 
+//https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+function collides(obj1, obj2) {
+  return obj1.x < obj2.x + obj2.width &&
+
+         obj1.x + obj1.width > obj2.x &&
+
+         obj1.y < obj2.y + obj2.height &&
+
+         obj1.y + obj1.height > obj2.y;
+  }
+//игра
+ function loop() {
+   requestAnimationFrame(loop);
+   context.clearRect(0,0,canvas.width,canvas.height);
+
+//продолжение движения вратарей
+leftV.y += leftV.dy;
+rightV.y += rightV.dy;
+//проверка границ вратарей
+if (leftV.y < razmk) {
+  leftV.y = razmk;
+}
+else if (leftV.y > maxVY) {
+  leftV.y = maxVY;
+}
+if (rightV.y < razmk) {
+  rightV.y = razmk;
+}
+else if (rightV.y > maxVY) {
+  rightV.y = maxVY;
+}
+//рисовашки|формы вратарей
+context.fillStyle = 'black';
+context.fillRect(leftV.x, leftV.y, leftV.width, leftV.height);
+context.fillRect(rightV.x, rightV.y, rightV.width, rightV.height);
+ball.x += ball.dx;
+ball.y += ball.dy;
+//смена движения вста вратарь отбил
+if (ball.y < razmk) {
+  ball.y = razmk;
+  ball.dy *= -1;
+}
+else if (ball.y + razmk > canvas.height - razmk) {
+  ball.y = canvas.height - razmk * 2;
+  ball.dy *= -1;
+}
+//возвращение блудного мяча
+if ( (ball.x < 0 || ball.x > canvas.width) && !ball.resetting) {
+  ball.resetting = true;
+  setTimeout(() => {
+    ball.resetting = false;
+    ball.x = canvas.width / 2;
+    ball.y = canvas.height / 2;
+  }, 1000);
+}
+// Если мяч отбил левый вратарь,
+if (collides(ball, leftV)) {
+  // отбить
+  ball.dx *= -1;
+  ball.x = leftV.x + leftV.width;
+}
+// правый вратарь, тоже самое
+else if (collides(ball, rightV)) {
+  ball.dx *= -1;
+  ball.x = rightV.x - ball.width;
+}
+//Снова рисоваашки
+//мяч
+context.fillRect(ball.x, ball.y, ball.width, ball.height);
+// ворота, вратари
+context.fillStyle = 'red';
+context.fillRect(0, 0, canvas.width, razmk);
+context.fillRect(0, canvas.height - razmk, canvas.width, canvas.height);
+// линия посиребине
+for (let i = razmk; i < canvas.height - razmk; i += razmk * 2) {
+  context.fillRect(canvas.width / 2 - razmk / 2, i, razmk, razmk);
+}
+// Вратари, проверка
+document.addEventListener('keydown', function (e) {
+  //клавиша вверх,
+  if (e.which === 38) {
+    //то вверх
+    rightV.dy = -VSpeed;
+  }
+  //клавиша вниз,
+  else if (e.which === 40) {
+    // то вниз
+    rightV.dy = VSpeed;
+  }
+  //клавиша W, 
+  if (e.which === 87) {
+    //то вверх
+    leftV.dy = -VSpeed;
+  }
+  //клавиша S,
+  else if (e.which === 83) {
+    //то вниз
+    leftV.dy = VSpeed;
+  }
+});
+//одновременно проверка
+document.addEventListener('keyup', function (e) {
+  if (e.which === 38 || e.which === 40) {
+    rightV.dy = 0;
+  }
+  if (e.which === 83 || e.which === 87) {
+    leftV.dy = 0;
+  }
+});
+ }
+ // Запуск игры
+requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
